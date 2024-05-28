@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <title>Week 2 — Day 2</title>
+    <link rel='stylesheet' href='assets/remark.css'>
+  </head>
+  <body>
+    <textarea id='source'>
+
+class: center, middle
+
+# Week 2 — Day 2
+
+## Distributions
+
+### Deepayan Sarkar
+
+<h1 onclick='document.documentElement.requestFullscreen();' style='cursor: pointer;'>
+<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-arrows-fullscreen' viewBox='0 0 16 16'>
+  <path fill-rule='evenodd' d='M5.828 10.172a.5.5 0 0 0-.707 0l-4.096 4.096V11.5a.5.5 0 0 0-1 0v3.975a.5.5 0 0 0 .5.5H4.5a.5.5 0 0 0 0-1H1.732l4.096-4.096a.5.5 0 0 0 0-.707zm4.344 0a.5.5 0 0 1 .707 0l4.096 4.096V11.5a.5.5 0 1 1 1 0v3.975a.5.5 0 0 1-.5.5H11.5a.5.5 0 0 1 0-1h2.768l-4.096-4.096a.5.5 0 0 1 0-.707zm0-4.344a.5.5 0 0 0 .707 0l4.096-4.096V4.5a.5.5 0 1 0 1 0V.525a.5.5 0 0 0-.5-.5H11.5a.5.5 0 0 0 0 1h2.768l-4.096 4.096a.5.5 0 0 0 0 .707zm-4.344 0a.5.5 0 0 1-.707 0L1.025 1.732V4.5a.5.5 0 0 1-1 0V.525a.5.5 0 0 1 .5-.5H4.5a.5.5 0 0 1 0 1H1.732l4.096 4.096a.5.5 0 0 1 0 .707z'/>
+</svg>
+</h1>
+
+---
+
+
+
+
+
+
+
+<div>
+$$
+\newcommand{\sub}{_}
+$$
+</div>
+
+
+# Today's goals
+
+* Some more preliminary concepts
+
+	* Visualization
+
+	* Distributions (probability)
+
+	* Data Frame (R equivalent of a spreadsheet)
+
+---
+
+layout: true
+
+# Probability distribution 
+
+---
+
+* Example: Number of distinct birthdays in a group of $n$ people
+
+
+```r
+distinct_birthdays <- function(n) {
+    sample(1:365, n, replace = TRUE) |> unique() |> length()
+}
+```
+
+* The `|>` notation represents a "pipe" operator
+
+* This is equivalent to 
+
+```r
+distinct_birthdays <- function(n) {
+    length(unique(sample(1:365, n, replace = TRUE)))
+}
+```
+
+---
+
+* This is a 'random' quantity — depends on the sample drawn
+
+--
+
+* We can repeat the simulation experiment and obtain 'data'
+
+
+```r
+d <- replicate(25, distinct_birthdays(23))
+d # each element represents result of one simulation
+```
+
+```
+ [1] 23 23 23 23 21 23 23 21 21 22 23 22 23 23 22 23 21 22 23 23 23 21 23 21 22
+```
+
+--
+
+* How can we plot this data? 
+
+* Do we even want to?
+
+---
+
+layout: true
+
+# The `plot()` function
+
+---
+
+
+```r
+plot(d) # not very useful in this case
+```
+
+![plot of chunk unnamed-chunk-3](figures/distribution-unnamed-chunk-3-1.svg)
+
+---
+
+
+```r
+plot(sort(d), pch = 16) # sorting makes it slightly more useful 
+```
+
+![plot of chunk unnamed-chunk-4](figures/distribution-unnamed-chunk-4-1.svg)
+
+---
+
+layout: true
+
+# The `stripchart()` function
+
+---
+
+
+```r
+stripchart(d) # also mostly useless
+```
+
+![plot of chunk unnamed-chunk-5](figures/distribution-unnamed-chunk-5-1.svg)
+
+---
+
+
+```r
+stripchart(d, method = "jitter") # but stripchart() has some useful options
+```
+
+![plot of chunk unnamed-chunk-6](figures/distribution-unnamed-chunk-6-1.svg)
+
+---
+
+
+```r
+stripchart(d, method = "stack") # more useful: the "stack" method
+```
+
+![plot of chunk unnamed-chunk-7](figures/distribution-unnamed-chunk-7-1.svg)
+
+---
+
+* Let's try with a larger $n$ and more replications
+
+
+```r
+d50 <- replicate(100, distinct_birthdays(50))
+d50
+```
+
+```
+  [1] 48 45 46 47 44 48 45 43 45 47 45 44 47 49 46 47 48 48 47 45 47 46 46 49 46
+ [26] 48 48 43 50 47 47 48 47 48 46 45 48 47 46 49 42 45 44 45 46 45 47 43 49 46
+ [51] 48 49 46 46 48 48 46 47 48 47 46 47 47 47 42 47 47 50 45 48 48 47 48 46 48
+ [76] 45 48 45 46 45 48 44 48 48 49 48 50 49 47 48 45 46 50 48 46 49 48 48 46 45
+```
+
+---
+
+
+```r
+stripchart(d50, method = "stack", pch = 16)
+```
+
+![plot of chunk unnamed-chunk-9](figures/distribution-unnamed-chunk-9-1.svg)
+
+---
+
+layout: true
+
+# Tables: `barplot()` and `dotchart()`
+
+---
+
+* By stacking, we are basically counting the "frequency" of each value
+
+--
+
+* This can be done directly using the `table()` function
+
+
+```r
+table(d50)
+```
+
+```
+d50
+42 43 44 45 46 47 48 49 50 
+ 2  3  4 15 18 20 26  8  4 
+```
+
+---
+
+* We are actually interested in just the proportion
+
+
+```r
+table(d50) |> prop.table()
+```
+
+```
+d50
+  42   43   44   45   46   47   48   49   50 
+0.02 0.03 0.04 0.15 0.18 0.20 0.26 0.08 0.04 
+```
+
+* Tables can be plotted using "bar charts" and "dot plots"
+
+---
+
+
+```r
+table(d50) |> prop.table() |> barplot()
+```
+
+![plot of chunk unnamed-chunk-12](figures/distribution-unnamed-chunk-12-1.svg)
+
+---
+
+
+```r
+table(d50) |> prop.table() |> dotchart(pch = 16)
+```
+
+![plot of chunk unnamed-chunk-13](figures/distribution-unnamed-chunk-13-1.svg)
+
+---
+
+layout: true
+
+# Alternative function: `barchart()`
+
+---
+
+* Did you notice that the names are switched around?
+
+--
+
+* R comes with an add-on package called `lattice` which has alternative implementations
+
+* To use it, you need to "load" the `lattice` package
+
+
+```r
+library(package = "lattice")
+```
+
+---
+
+
+```r
+table(d50) |> prop.table() |> barchart()
+```
+
+![plot of chunk unnamed-chunk-15](figures/distribution-unnamed-chunk-15-1.svg)
+
+---
+
+
+```r
+table(d50) |> prop.table() |>
+    barchart(horizontal = FALSE)
+```
+
+![plot of chunk unnamed-chunk-16](figures/distribution-unnamed-chunk-16-1.svg)
+
+---
+
+
+```r
+replicate(100, distinct_birthdays(50)) |> table() |> prop.table() |>
+    barchart(horizontal = FALSE) # another simulation
+```
+
+![plot of chunk unnamed-chunk-17](figures/distribution-unnamed-chunk-17-1.svg)
+
+---
+
+
+```r
+replicate(100000, distinct_birthdays(50)) |> table() |> prop.table() |>
+    barchart(horizontal = FALSE) # increase replications
+```
+
+![plot of chunk unnamed-chunk-18](figures/distribution-unnamed-chunk-18-1.svg)
+
+---
+
+
+```r
+replicate(100000, distinct_birthdays(60)) |> table() |> prop.table() |>
+    barchart(horizontal = FALSE) # n = 60
+```
+
+![plot of chunk unnamed-chunk-19](figures/distribution-unnamed-chunk-19-1.svg)
+
+---
+
+
+```r
+replicate(100000, distinct_birthdays(70)) |> table() |> prop.table() |>
+    barchart(horizontal = FALSE) # n = 70
+```
+
+![plot of chunk unnamed-chunk-20](figures/distribution-unnamed-chunk-20-1.svg)
+
+---
+
+
+```r
+replicate(100000, distinct_birthdays(80)) |> table() |> prop.table() |>
+    barchart(horizontal = FALSE) # n = 80
+```
+
+![plot of chunk unnamed-chunk-21](figures/distribution-unnamed-chunk-21-1.svg)
+
+---
+
+layout: true
+
+# Distribution
+
+---
+
+* What we are really trying to visualize is a "probability distribution"
+
+--
+
+* Let $X$ be the number of distinct birthdays in a group of 80 people
+
+	* What is $P(X = 80)$ ?
+
+--
+
+	* What is $P(X = 79)$ ?
+
+	* What is $P(X = 78)$ ?
+
+--
+
+	* What is the most likely value of $X$ ?
+
+	* What is the expected value of $X$ ?
+
+--
+
+* In this case, true answer is difficult to calculate
+
+* Simulation will give us answers that will be close (by "law of large numbers")
+
+
+---
+
+layout: true
+
+# The Binomial distribution
+
+---
+
+* An important distribution: number of successes in $n$ independent trials (e.g., coin tosses)
+
+* The probabily of success in one trial is $p$ (which is known, but not necessarily $\frac12$)
+
+--
+
+* We can simulate exactly as before
+
+
+```r
+n <- 80
+sample(c(0, 1), size = n, replace = TRUE)
+```
+
+```
+ [1] 1 1 0 0 0 0 1 0 1 1 1 1 1 0 0 0 1 0 0 1 0 1 0 0 0 0 1 1 0 1 1 1 0 0 1 1 0 1
+[39] 1 1 0 0 0 1 1 0 1 0 0 1 1 0 0 0 1 0 0 1 0 0 0 1 0 1 1 1 0 1 1 0 1 1 0 0 1 1
+[77] 0 0 1 1
+```
+
+```r
+sample(c(0, 1), size = n, replace = TRUE) |> sum()
+```
+
+```
+[1] 44
+```
+
+---
+
+
+```r
+replicate(100000, sum(sample(c(0, 1), size = 80, replace = TRUE))) |>
+    table()
+```
+
+```
+
+  21   22   23   24   25   26   27   28   29   30   31   32   33   34   35   36 
+   2    4   11   15   30   60  115  255  456  699 1166 1765 2687 3661 4858 6046 
+  37   38   39   40   41   42   43   44   45   46   47   48   49   50   51   52 
+7145 8016 8662 8851 8824 8169 7118 5982 4681 3610 2524 1797 1181  705  440  234 
+  53   54   55   56   57   58   59 
+ 124   52   35   11    7    1    1 
+```
+
+---
+
+
+```r
+replicate(100000, sum(sample(c(0, 1), size = 80, replace = TRUE))) |>
+    table() |> prop.table()
+```
+
+```
+
+     19      22      23      24      25      26      27      28      29      30 
+0.00002 0.00002 0.00005 0.00013 0.00038 0.00064 0.00135 0.00215 0.00385 0.00745 
+     31      32      33      34      35      36      37      38      39      40 
+0.01141 0.01810 0.02642 0.03639 0.04662 0.05985 0.07051 0.07983 0.08653 0.08975 
+     41      42      43      44      45      46      47      48      49      50 
+0.08708 0.08061 0.07153 0.06027 0.05030 0.03471 0.02674 0.01849 0.01242 0.00737 
+     51      52      53      54      55      56      57      58      60 
+0.00424 0.00238 0.00118 0.00069 0.00033 0.00013 0.00003 0.00004 0.00001 
+```
+
+---
+
+
+```r
+replicate(100000, sum(sample(c(0, 1), size = 80, replace = TRUE))) |> 
+    table() |> prop.table() |> barchart(horizontal = FALSE)
+```
+
+![plot of chunk unnamed-chunk-25](figures/distribution-unnamed-chunk-25-1.svg)
+
+---
+
+
+```r
+replicate(100000, sum(sample(c(0, 1), size = 80, replace = TRUE, prob = c(0.1, 0.9)))) |> 
+    table() |> prop.table() |> barchart(horizontal = FALSE)
+```
+
+![plot of chunk unnamed-chunk-26](figures/distribution-unnamed-chunk-26-1.svg)
+
+---
+
+* In this example, the exact probabilities are actually easy to calculate
+
+* Let $X$ be the number of successes in $n$ independent trials with probabily of success $p$. Then, 
+
+$$
+P(X = k) = { n \choose k } \, p^k \, (1-p)^{n - k}\,, \, k = 0, 1, 2, \dotsc, n
+$$
+
+---
+
+* To compare, we need both simulation probabilities and exact probabilities
+
+* This is where data frames become useful
+
+--
+
+* Data frames are like a spreadsheet, containing multiple columns
+
+* Every column must have a name, and must have the same length
+
+---
+
+* Example: Proportions observed in simulation
+
+
+```r
+X <- replicate(100000, sum(sample(c(0, 1), size = 80, replace = TRUE, prob = c(0.1, 0.9))))
+T <- prop.table(table(X))
+```
+
+--
+
+
+```r
+T
+```
+
+```
+X
+     55      57      58      59      60      61      62      63      64      65 
+0.00001 0.00001 0.00002 0.00002 0.00006 0.00029 0.00053 0.00133 0.00313 0.00682 
+     66      67      68      69      70      71      72      73      74      75 
+0.01383 0.02720 0.04742 0.07271 0.10278 0.13107 0.14719 0.14409 0.12401 0.08993 
+     76      77      78      79      80 
+0.05289 0.02415 0.00809 0.00220 0.00022 
+```
+
+```r
+str(T)
+```
+
+```
+ 'table' num [1:25(1d)] 0.00001 0.00001 0.00002 0.00002 0.00006 0.00029 0.00053 0.00133 0.00313 0.00682 ...
+ - attr(*, "dimnames")=List of 1
+  ..$ X: chr [1:25] "55" "57" "58" "59" ...
+```
+
+
+---
+
+.scrollable500[
+
+
+```r
+df <- data.frame(k = as.integer(names(T)), proportion = as.numeric(T))
+df
+```
+
+```
+    k proportion
+1  55    0.00001
+2  57    0.00001
+3  58    0.00002
+4  59    0.00002
+5  60    0.00006
+6  61    0.00029
+7  62    0.00053
+8  63    0.00133
+9  64    0.00313
+10 65    0.00682
+11 66    0.01383
+12 67    0.02720
+13 68    0.04742
+14 69    0.07271
+15 70    0.10278
+16 71    0.13107
+17 72    0.14719
+18 73    0.14409
+19 74    0.12401
+20 75    0.08993
+21 76    0.05289
+22 77    0.02415
+23 78    0.00809
+24 79    0.00220
+25 80    0.00022
+```
+
+]
+
+---
+
+.scrollable500[
+
+
+```r
+df$probability <- with(df, choose(80, k) * 0.9^k * 0.1^(80-k))
+df
+```
+
+```
+    k proportion  probability
+1  55    0.00001 1.105960e-07
+2  57    0.00001 1.683886e-06
+3  58    0.00002 6.009732e-06
+4  59    0.00002 2.016825e-05
+5  60    0.00006 6.353000e-05
+6  61    0.00029 1.874656e-04
+7  62    0.00053 5.170421e-04
+8  63    0.00133 1.329537e-03
+9  64    0.00313 3.178424e-03
+10 65    0.00682 7.041432e-03
+11 66    0.01383 1.440293e-02
+12 67    0.02720 2.708610e-02
+13 68    0.04742 4.660403e-02
+14 69    0.07271 7.294544e-02
+15 70    0.10278 1.031657e-01
+16 71    0.13107 1.307734e-01
+17 72    0.14719 1.471201e-01
+18 73    0.14409 1.451048e-01
+19 74    0.12401 1.235351e-01
+20 75    0.08993 8.894529e-02
+21 76    0.05289 5.266497e-02
+22 77    0.02415 2.462259e-02
+23 78    0.00809 8.523203e-03
+24 79    0.00220 1.941996e-03
+25 80    0.00022 2.184745e-04
+```
+
+]
+
+---
+
+
+```r
+with(df, plot(k, proportion, pch = 16))
+with(df, lines(k, probability, col = "blue"))
+```
+
+![plot of chunk unnamed-chunk-31](figures/distribution-unnamed-chunk-31-1.svg)
+
+---
+
+layout: false
+class: center, middle
+
+# Questions?
+
+
+
+
+
+
+
+
+    </textarea>
+  </body>
+
+  <script 
+	  src='assets/remark-latest.min.js'
+	  type='text/javascript'></script>
+
+  <script type='text/javascript'>
+    var slideshow = remark.create(
+	{
+	    navigation: {scroll: false,},
+	    ratio: '16:9',
+	    // ratio: '4:3',
+	    countIncrementalSlides: false
+	});
+    
+    // Setup MathJax; unused if mathjax == false
+    MathJax = {
+	tex: {
+	    inlineMath: [ ['$', '$'], ['\\(', '\\)'] ],
+	    displayMath: [ ['$$', '$$'], ['\\[', '\\]'] ]
+	},
+	svg: {
+	    fontCache: 'global'
+	},
+    };
+
+  </script>
+
+  <script type='text/javascript' async
+	  src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js'>
+  </script>
+
+</html>
+

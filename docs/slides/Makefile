@@ -1,5 +1,5 @@
 
-all: 01-introduction.html 02-roverview.html 
+all: 01-introduction.html 02-distribution.html 03-visualization.html 
 
 %.md: %.rmd
 	Rscript -e "library(knitr); knit('$<')"
