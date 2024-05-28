@@ -310,7 +310,7 @@ layout: true
 ---
 
 ```{r}
-lgp <- read.csv("data/lgp-survey.csv")
+lgp <- read.csv("https://deepayan.github.io/LGP2024/slides/data/lgp-survey.csv")
 str(lgp)
 ```
 
@@ -380,6 +380,22 @@ xtabs(~ Dress + HasY, data = lgp) |> prop.table(margin = 2) |> round(digits = 2)
 ```
 
 ---
+
+```{r}
+xtabs(~ BirthMonth, data = lgp) |> sort() |> barchart()
+```
+
+---
+
+* What formal questions can we pose after seeing these summaries?
+
+--
+
+* Will discuss tomorrow
+
+---
+
+layout: false
 
 class: center middle
 

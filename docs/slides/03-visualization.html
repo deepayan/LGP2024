@@ -481,7 +481,7 @@ layout: true
 
 
 ```r
-lgp <- read.csv("data/lgp-survey.csv")
+lgp <- read.csv("https://deepayan.github.io/LGP2024/slides/data/lgp-survey.csv")
 str(lgp)
 ```
 
@@ -623,6 +623,25 @@ Dress              No  Yes
 ```
 
 ---
+
+
+```r
+xtabs(~ BirthMonth, data = lgp) |> sort() |> barchart()
+```
+
+![plot of chunk unnamed-chunk-32](figures/vis-unnamed-chunk-32-1.svg)
+
+---
+
+* What formal questions can we pose after seeing these summaries?
+
+--
+
+* Will discuss tomorrow
+
+---
+
+layout: false
 
 class: center middle
 
