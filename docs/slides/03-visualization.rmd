@@ -1,0 +1,388 @@
+---
+layout: remark
+title: Week 2 — Day 3
+subtitle: Data Visualization
+author: Deepayan Sarkar
+mathjax: true
+---
+
+
+```{r opts, echo = FALSE, results = "hide", warning = FALSE, message = FALSE}
+opts_chunk$set(cache = TRUE, cache.path='~/knitr-cache/lgp-visualization/', autodep = TRUE,
+               comment = "", warning = TRUE, message = TRUE,
+			   ## engine.path = list(python = "/usr/bin/python3"),
+               fig.width = 12, fig.height = 5,
+               dev = "svglite", dev.args = list(pointsize = 12),
+               knitr.table.format = "html",
+			   fig.path='figures/vis-')
+options(warnPartialMatchDollar = FALSE, width = 80)
+suppressWarnings(require(dplyr))
+```
+
+
+<div>
+$$
+\newcommand{\sub}{_}
+$$
+</div>
+
+
+# Data Visualization
+
+* Important tool to understand data
+
+--
+
+* Main purposes
+
+	- Exploration
+
+	- Presentation
+
+---
+
+# Today's goals
+
+- Learn what kind of visualizations we can use
+
+- How to create them uisng R
+
+---
+
+layout: false
+
+# Example datasets: `airquality` (size: small)
+
+```{r}
+str(airquality) # built-in dataset
+```
+
+???
+
+The first dataset we will consider is a simple built-in dataset in R,
+
+- giving daily air quality measurements in New York City,
+
+- over five months in 1973.
+
+It has 153 observations, one for each day from May through September.
+
+---
+
+# Example datasets: `airquality` (size: small)
+
+```{r}
+head(airquality, 15)
+```
+
+???
+
+There are some NA values, which indicate missing data.
+
+Also notice that dates are specified separately in MONTH and DAY
+columns, and MONTH is indicated by number rather than name.
+
+---
+
+# Example datasets: `NHANES` (size: somewhat large)
+
+.scrollable500[
+
+```{r}
+library(package = "NHANES")
+str(NHANES)
+```
+
+]
+
+???
+
+Data originally come from a health and nutrition survey conducted regularly in the USA.
+
+Each row in this dataset represents a respondent in the study.
+
+The actual study uses a fairly complex survey design.
+
+This is not the full dataset, but rather a carefully chosen subset that can be treated as a _random sample_ from the US population.
+
+---
+
+# The goal of data visualization
+
+* Visualizations help us study relationships
+
+* This is enabled by comparison
+
+
+???
+
+visual comparisons require the data values being plotted to be
+converted into something that _can_ be plotted.
+
+The most common and obvious mapping is from a value to a _coordinate
+position_ on the plot.
+
+But the mapping can also be to _length_, _area_, or even
+_color_.
+
+We will see some of these mappings in the examples that follow.
+
+---
+
+# What do we study using visualization?
+
+- Univariate distributions
+
+- Bivariate and trivariate (generally multivariate) relationships
+
+- Special case: Relationship with time (time-series) or space (spatial)
+
+???
+
+Let us now dive into some visualization _examples_, keeping our earlier discussion in mind.
+
+We will start with a simple univariate data vector, namely, the vector of ozone concentrations in the AIR QUALITY data set.
+
+---
+
+# The `plot()` function
+
+```{r}
+plot(airquality$Ozone)
+```
+
+---
+
+layout: true
+
+# Univariate distributions: strip charts or dot plots
+
+---
+
+```{r}
+stripchart(airquality$Ozone)
+```
+
+---
+
+```{r}
+stripchart(airquality$Ozone, method = "stack", pch = 16)
+```
+
+---
+
+layout: true
+
+# Univariate distributions: comparative strip charts
+
+---
+
+```{r}
+stripchart(Ozone ~ factor(Month), data = airquality, method = "stack", pch = 16)
+```
+
+---
+
+```{r}
+airquality$Month <- factor(airquality$Month, labels = month.abb[5:9])
+stripchart(Temp ~ Month, data = airquality, method = "stack", pch = 16)
+```
+
+---
+
+```{r}
+stripchart(DirectChol ~ Gender, data = NHANES, method = "jitter", pch = 16)
+```
+
+---
+
+```{r}
+stripchart(DirectChol ~ Gender, data = NHANES, method = "jitter", pch = 16, col = rgb(0, 0, 0, alpha = 0.1))
+```
+
+---
+
+layout: true
+
+# Univariate distributions: comparative box and whisker plots
+
+---
+
+```{r fig.height=5}
+boxplot(DirectChol ~ Gender, data = NHANES, horizontal = TRUE, range = 0)
+```
+
+---
+
+```{r fig.height=5}
+boxplot(DirectChol ~ Gender, data = NHANES, horizontal = TRUE)
+```
+
+---
+
+```{r fig.height=5}
+library(package = "lattice")
+bwplot(Gender ~ BPSysAve, data = NHANES)
+```
+
+---
+
+layout: false
+
+# Univariate distributions: comparative histograms
+
+```{r}
+histogram( ~ BPSysAve | Gender, data = NHANES, layout = c(1, 2), nint = 25)
+```
+
+---
+
+# Univariate distributions: comparative box plots
+
+```{r}
+bwplot(Race1 ~ Weight | Gender, data = NHANES)
+```
+
+???
+
+Notice that in the last two plots, we have used a combination of two
+grouping attributes to separate the data, race and gender, using
+conditioning, along with the usual comparative boxplot design.
+
+This kind of comparison among subgroups is something that a
+well-designed plot can convey very effectively.
+
+For example, this plot suggests that weight distribution varies across
+racial subgroups, and the pattern of changes is largely the same for
+males and females, except for blacks.
+
+
+---
+
+# Summary: Univariate distributions
+
+* Basic design: Strip charts
+
+* Generalizations: box and whisker plots, histograms
+
+---
+
+# Bivariate distributions: scatter plot
+
+* Encodes two variables as x- and y-coordinates
+
+```{r,fig.height=5}
+plot(Ozone ~ Solar.R, data = airquality)
+```
+
+---
+
+
+# Bivariate distributions: scatter plot
+
+```{r}
+xyplot(Ozone ~ Solar.R, data = airquality, grid = TRUE)
+```
+
+---
+
+# Bivariate distributions: comparative scatter plots
+
+
+```{r}
+xyplot(Ozone ~ Solar.R | Month, data = airquality, grid = TRUE, layout = c(5, 1), pch = 16)
+```
+
+---
+
+# Bivariate distributions: semi-transparent colors
+
+```{r}
+xyplot(Weight ~ Height | Gender, data = NHANES, grid = TRUE, pch = 16, alpha = 0.1)
+```
+
+---
+
+layout: true
+
+# Our survey data
+
+---
+
+```{r}
+lgp <- read.csv("data/lgp-survey.csv")
+str(lgp)
+```
+
+---
+
+```{r, fig.height=6}
+xyplot(Height_Father ~ Height_Mother, data = lgp, grid = TRUE)
+```
+
+---
+
+```{r, fig.height=6}
+xyplot(Height_Father ~ Height_Mother, data = lgp, grid = TRUE, abline = c(0, 1), jitter.x = TRUE, jitter.y = TRUE)
+```
+
+---
+
+```{r, fig.height=6}
+xyplot(Height_Self ~ Height_Mother, data = lgp, grid = TRUE, abline = c(0, 1))
+```
+
+---
+
+```{r, fig.height=6}
+xyplot(Height_Self ~ Height_Mother | HasY, data = lgp, grid = TRUE, abline = c(0, 1))
+```
+
+---
+
+```{r, fig.height=6}
+xyplot(Height_Self ~ Height_Father | HasY, data = lgp, grid = TRUE, abline = c(0, 1))
+```
+
+---
+
+<img style="width: 30%; float: right" src="images/dress.jpg"></img>
+
+```{r}
+xtabs(~ Dress, data = lgp)
+```
+
+
+--
+
+```{r}
+xtabs(~ Dress + BirthdayOddEven, data = lgp)
+```
+
+--
+
+```{r}
+xtabs(~ Dress + HasY, data = lgp)
+```
+
+---
+
+```{r}
+xtabs(~ Dress, data = lgp)
+```
+
+```{r}
+xtabs(~ Dress + BirthdayOddEven, data = lgp) |> prop.table(margin = 2) |> round(digits = 2)
+```
+
+```{r}
+xtabs(~ Dress + HasY, data = lgp) |> prop.table(margin = 2) |> round(digits = 2)
+```
+
+---
+
+class: center middle
+
+# Questions?
+
+
