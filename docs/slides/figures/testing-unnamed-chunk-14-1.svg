@@ -46,7 +46,7 @@
 <text transform='translate(41.76,137.69) rotate(-90)' text-anchor='middle' style='font-size: 12.00px; font-family: "Arial";' textLength='13.35px' lengthAdjust='spacingAndGlyphs'>30</text>
 <text transform='translate(41.76,90.87) rotate(-90)' text-anchor='middle' style='font-size: 12.00px; font-family: "Arial";' textLength='13.35px' lengthAdjust='spacingAndGlyphs'>40</text>
 <polygon points='59.04,286.56 833.76,286.56 833.76,59.04 59.04,59.04 ' style='stroke-width: 0.75;' />
-<text x='446.40' y='34.70' text-anchor='middle' style='font-size: 14.40px; font-weight: bold; font-family: "Arial";' textLength='32.00px' lengthAdjust='spacingAndGlyphs'>Male</text>
+<text x='446.40' y='34.70' text-anchor='middle' style='font-size: 14.40px; font-weight: bold; font-family: "Arial";' textLength='49.60px' lengthAdjust='spacingAndGlyphs'>Female</text>
 <text x='446.40' y='341.28' text-anchor='middle' style='font-size: 12.00px; font-family: "Arial";' textLength='6.67px' lengthAdjust='spacingAndGlyphs'>0</text>
 <text transform='translate(12.96,172.80) rotate(-90)' text-anchor='middle' style='font-size: 12.00px; font-family: "Arial";' textLength='6.67px' lengthAdjust='spacingAndGlyphs'>0</text>
 </g>

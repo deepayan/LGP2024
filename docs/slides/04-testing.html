@@ -251,7 +251,7 @@ for (p in seq(0.01, 0.99, by = 0.005)) {
 
 
 ```r
-plot(0, 0, type = "n", xlim = c(0, 1), ylim = c(0, 45), main = "Male"); abline(h = 21, col = "blue")
+plot(0, 0, type = "n", xlim = c(0, 1), ylim = c(0, 45), main = "Female"); abline(h = 21, col = "blue")
 for (p in seq(0.01, 0.99, by = 0.005)) {
     xrange <- most_likely_x(p, n = 45)
     lines(c(p, p), xrange, col = if (21 > xrange[1] && 21 < xrange[2]) "red" else "grey50")
