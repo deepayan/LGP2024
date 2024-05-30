@@ -1,0 +1,525 @@
+---
+layout: remark
+title: Week 2 — Day 4
+subtitle: Hypothesis Testing
+author: Deepayan Sarkar
+mathjax: true
+---
+
+
+```{r opts, echo = FALSE, results = "hide", warning = FALSE, message = FALSE}
+opts_chunk$set(cache = TRUE, cache.path='~/knitr-cache/lgp-testing/', autodep = TRUE,
+               comment = "", warning = TRUE, message = TRUE,
+			   ## engine.path = list(python = "/usr/bin/python3"),
+               fig.width = 12, fig.height = 5,
+               dev = "svglite", dev.args = list(pointsize = 12),
+               knitr.table.format = "html",
+			   fig.path='figures/testing-')
+options(warnPartialMatchDollar = FALSE, width = 80)
+suppressWarnings(require(dplyr))
+```
+
+
+<div>
+$$
+\newcommand{\sub}{_}
+$$
+</div>
+
+
+# Hypothesis Testing
+
+* Formal process to ask and answer questions
+
+--
+
+* Conjecture ("null hypothesis"): observed data come from a specified probability model
+
+* Test: Is observed data "plausible" if the model is correct?
+
+--
+
+* The model is usually a simple __abstraction__ of reality
+
+---
+
+layout: true
+
+# Example: The dress
+
+---
+
+```{r}
+lgp <- read.csv("https://deepayan.github.io/LGP2024/slides/data/lgp-survey.csv")
+xtabs(~ Dress, data = lgp)
+```
+
+--
+
+* Define "Blue and Black" to be success
+
+* Assume $n = `r {(n <- nrow(lgp))}`$ independent trials, each with success probability $p$
+
+* Is this is a reasonable model?
+
+--
+
+* Observation: $X = `r {(X <- sum(lgp$Dress == "Blue and Black"))}`$
+
+* What are "plausible" values of $p$?
+
+--
+
+* Remember: Distribution of $X$
+$$
+P(X = k) = { n \choose k } \, p^k \, (1-p)^{n - k}\,, \, k = 0, 1, 2, \dotsc, n
+$$
+
+---
+
+* Is $p = 0.1$ plausible?
+
+```{r}
+plot(0:n, dbinom(0:n, size = n, prob = 0.1), pch = 16)
+lines(qbinom(c(0.05, 0.95), size = n, prob = 0.1), c(0, 0), col = "red", lwd = 2)
+abline(v = X, col = "blue")
+```
+
+---
+
+* Is $p = 0.2$ plausible?
+
+```{r}
+plot(0:n, dbinom(0:n, size = n, prob = 0.2), pch = 16)
+lines(qbinom(c(0.05, 0.95), size = n, prob = 0.2), c(0, 0), col = "red", lwd = 2)
+abline(v = X, col = "blue")
+```
+
+---
+
+* Is $p = 0.3$ plausible?
+
+```{r}
+plot(0:n, dbinom(0:n, size = n, prob = 0.3), pch = 16)
+lines(qbinom(c(0.05, 0.95), size = n, prob = 0.3), c(0, 0), col = "red", lwd = 2)
+abline(v = X, col = "blue")
+```
+
+---
+
+* Is $p = 0.4$ plausible?
+
+```{r}
+plot(0:n, dbinom(0:n, size = n, prob = 0.4), pch = 16)
+lines(qbinom(c(0.05, 0.95), size = n, prob = 0.4), c(0, 0), col = "red", lwd = 2)
+abline(v = X, col = "blue")
+```
+
+---
+
+* Is $p = 0.5$ plausible?
+
+```{r}
+plot(0:n, dbinom(0:n, size = n, prob = 0.5), pch = 16)
+lines(qbinom(c(0.05, 0.95), size = n, prob = 0.5), c(0, 0), col = "red", lwd = 2)
+abline(v = X, col = "blue")
+```
+
+---
+
+* Is $p = 0.6$ plausible?
+
+```{r}
+plot(0:n, dbinom(0:n, size = n, prob = 0.6), pch = 16)
+lines(qbinom(c(0.05, 0.95), size = n, prob = 0.6), c(0, 0), col = "red", lwd = 2)
+abline(v = X, col = "blue")
+```
+
+---
+
+* Is $p = 0.7$ plausible?
+
+```{r}
+plot(0:n, dbinom(0:n, size = n, prob = 0.7), pch = 16)
+lines(qbinom(c(0.05, 0.95), size = n, prob = 0.7), c(0, 0), col = "red", lwd = 2)
+abline(v = X, col = "blue")
+```
+
+---
+
+```{r}
+most_likely_x <- function(p, n) {
+    qbinom(c(0.05, 0.95), size = n, prob = p)
+}
+```
+
+--
+
+```{r}
+sapply(seq(0.1, 0.9, by = 0.1),
+       most_likely_x, n = 71)
+```
+
+
+---
+
+```{r}
+plot(0, 0, type = "n", xlim = c(0, 1), ylim = c(0, 71)); abline(h = 33, col = "blue")
+for (p in seq(0.01, 0.99, by = 0.005)) {
+    xrange <- most_likely_x(p, n = 71)
+    lines(c(p, p), xrange, col = if (33 > xrange[1] && 33 < xrange[2]) "red" else "grey50")
+}
+```
+
+---
+
+```{r}
+xtabs(~ Dress + HasY, data = lgp)
+```
+
+---
+
+```{r}
+plot(0, 0, type = "n", xlim = c(0, 1), ylim = c(0, 26), main = "Male"); abline(h = 12, col = "blue")
+for (p in seq(0.01, 0.99, by = 0.005)) {
+    xrange <- most_likely_x(p, n = 26)
+    lines(c(p, p), xrange, col = if (12 > xrange[1] && 12 < xrange[2]) "red" else "grey50")
+}
+```
+
+---
+
+```{r}
+plot(0, 0, type = "n", xlim = c(0, 1), ylim = c(0, 45), main = "Male"); abline(h = 21, col = "blue")
+for (p in seq(0.01, 0.99, by = 0.005)) {
+    xrange <- most_likely_x(p, n = 45)
+    lines(c(p, p), xrange, col = if (21 > xrange[1] && 21 < xrange[2]) "red" else "grey50")
+}
+```
+
+---
+
+```{r}
+xtabs(~ Dress + BirthdayOddEven, data = lgp)
+```
+
+---
+
+```{r}
+plot(0, 0, type = "n", xlim = c(0, 1), ylim = c(0, 32), main = "Even"); abline(h = 12, col = "blue")
+for (p in seq(0.01, 0.99, by = 0.005)) {
+    xrange <- most_likely_x(p, n = 32)
+    lines(c(p, p), xrange, col = if (12 > xrange[1] && 12 < xrange[2]) "red" else "grey50")
+}
+```
+
+---
+
+```{r}
+plot(0, 0, type = "n", xlim = c(0, 1), ylim = c(0, 39), main = "Odd"); abline(h = 21, col = "blue")
+for (p in seq(0.01, 0.99, by = 0.005)) {
+    xrange <- most_likely_x(p, n = 39)
+    lines(c(p, p), xrange, col = if (21 > xrange[1] && 21 < xrange[2]) "red" else "grey50")
+}
+```
+
+---
+
+layout: true
+
+# Confidence intervals
+
+---
+
+* The red regions are known as __confidence intervals__ for $p$
+
+* The associated confidence level is __90%__
+
+--
+
+* Thankfully, the confidence intervals for "odd" and "even" overlap!
+
+* So it is _plausible_ that a common value of $p$ gave rise to the observed data
+
+--
+
+* There is of course a built-in function to do something like this in R
+
+* This function is called `binom.test()`
+
+---
+
+```{r}
+binom.test(12, 32)
+```
+
+---
+
+```{r}
+binom.test(12, 32)$conf.int
+```
+
+--
+
+```{r}
+binom.test(21, 39)$conf.int
+```
+
+---
+
+layout: true
+
+# Permutation tests
+
+---
+
+* What we have just done is a _model-based_ test
+
+* This is not the only possible abstraction for our problem
+
+--
+
+* Another interesting approach gives rise to a permutation test
+
+---
+
+
+```{r}
+xtabs(~ Dress + BirthdayOddEven, data = lgp)
+```
+
+.scrollable500[
+
+```{r}
+lgp[c("Dress", "BirthdayOddEven")]
+```
+
+]
+
+---
+
+.scrollable500[
+
+```{r}
+lgp$PermOddEven <- sample(lgp$BirthdayOddEven)
+lgp[c("Dress", "BirthdayOddEven", "PermOddEven")]
+```
+
+]
+
+---
+
+```{r}
+xtabs(~ Dress + BirthdayOddEven, data = lgp)
+```
+
+```{r}
+xtabs(~ Dress + PermOddEven, data = lgp)
+```
+
+--
+
+```{r}
+with(lgp, sum(Dress == "Blue and Black" & BirthdayOddEven == "Even"))
+with(lgp, sum(Dress == "Blue and Black" & PermOddEven == "Even"))
+```
+
+
+---
+
+* Abstract conjecture: _NOT_ Binomial, instead...
+
+--
+
+	* Fixed sample — those who filled up the survey
+
+	* Response to the dress question is fixed (not random)
+
+	* Odd-Even label was randomly assigned
+
+
+--
+
+* Is this a reasonable abstraction?
+
+--
+
+* If yes, permuting Odd-Even labels should generate another "random" table from same distribution
+
+---
+
+```{r}
+with(lgp, sum(Dress == "Blue and Black" & BirthdayOddEven == "Even")) # observed
+```
+
+--
+
+```{r}
+with(lgp, sum(Dress == "Blue and Black" & sample(BirthdayOddEven) == "Even")) # random
+with(lgp, sum(Dress == "Blue and Black" & sample(BirthdayOddEven) == "Even")) # random
+with(lgp, sum(Dress == "Blue and Black" & sample(BirthdayOddEven) == "Even")) # random
+```
+
+---
+
+```{r}
+replicate(100,
+          with(lgp, sum(Dress == "Blue and Black" & sample(BirthdayOddEven) == "Even")))
+```
+
+---
+
+```{r}
+X.rand <- replicate(10000, with(lgp, sum(Dress == "Blue and Black" & sample(BirthdayOddEven) == "Even")))
+X.prob <- prop.table(table(X.rand))
+barplot(X.prob)
+```
+
+---
+
+```{r}
+plot(as.numeric(names(X.prob)), as.numeric(X.prob), pch = 16,
+     xlab = "Values of X", ylab = "Proportion of simulated cases")
+abline(v = 12, col = "blue")
+lines(quantile(X.rand, c(0.05, 0.95)), c(0, 0), col = "red", lwd = 2)
+lines(quantile(X.rand, c(0.25, 0.75)), c(0, 0), col = "red", lwd = 4)
+```
+
+---
+
+* We can apply the same idea to heights of your parents
+
+```{r,echo=FALSE}
+library(lattice)
+```
+
+```{r}
+xyplot(Height_Father ~ Height_Mother, data = lgp,
+       grid = TRUE, abline = c(0, 1), jitter.x = TRUE, jitter.y = TRUE)
+```
+
+---
+
+* What happens if we pair up the same set of heights randomly?
+
+```{r}
+xyplot(sample(Height_Father) ~ Height_Mother, data = lgp,
+       grid = TRUE, abline = c(0, 1), jitter.x = TRUE, jitter.y = TRUE)
+```
+
+---
+
+* This is our abstract model for the conjecture that parents' heights are "independent"
+
+* Same approach as before, with $X = $ number of pairs with mother taller than father
+
+```{r}
+lgpOK <- na.omit(lgp)
+replicate(100, with(lgpOK, sum( sample(Height_Father) < Height_Mother )))
+```
+
+---
+
+```{r}
+X.rand <- replicate(10000, with(lgpOK, sum( sample(Height_Father) < Height_Mother )))
+barplot(prop.table(table(X.rand)))
+```
+
+---
+
+* If our conjecture / hypothesis is __true__, the chance of seeing $X = 0$ is
+
+```{r}
+sum(X.rand == 0) / length(X.rand)
+```
+
+* This is _very small_, so the conjecture of independence is __not plausible__
+
+--
+
+* So we __reject__ the conjecture of independence
+
+--
+
+* None of these results are surprising
+	
+* But it is reassuring to see that a formal mathematical approach agrees with our intuition
+	
+
+---
+
+layout: true
+
+# Goodness of Fit test
+
+---
+
+* Finally, what about `BirthMonth` ?
+
+```{r}
+xtabs(~ BirthMonth, data = lgp)
+```
+
+--
+
+* This case is unfortunately not that simple
+
+* The main issue is: What measurement should we use as the random variable $X$?
+
+--
+
+* There is a standard answer which is difficult to justify: the $\chi^2$ goodness of fit test
+
+---
+
+* Let us first put the table in correct order
+
+```{r}
+mtab <- xtabs(~ factor(BirthMonth, levels = month.name), data = lgp)
+mtab
+```
+
+--
+
+```{r}
+chisq.test(mtab, p = c(31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31) / 365)
+```
+
+* Basically, this says that what we observe is very plausible if all birthdays are equally likely
+
+* However, we could well have come to a different conclusion if we had a lot more data
+
+
+---
+
+layout: false
+
+# Conclusion: Why R?
+
+<h2 style='text-align: center'>
+...to turn ideas into software, quickly and faithfully
+</h2>
+
+<p style='text-align: right'>
+—John Chambers, creator of the S (R) Language 
+</p>
+
+--
+
+* Tomorrow
+
+	* No slides
+	
+	* We will discuss problem solutions
+	
+	* Last chance to ask me questions!
+
+
+---
+
+layout: false
+
+class: center middle
+
+# Questions?
+
