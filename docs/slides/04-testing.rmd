@@ -370,7 +370,7 @@ replicate(100,
 ---
 
 ```{r}
-X.rand <- replicate(10000, with(lgp, sum(Dress == "Blue and Black" & sample(BirthdayOddEven) == "Even")))
+X.rand <- replicate(100000, with(lgp, sum(Dress == "Blue and Black" & sample(BirthdayOddEven) == "Even")))
 X.prob <- prop.table(table(X.rand))
 barplot(X.prob)
 ```
@@ -421,7 +421,7 @@ replicate(100, with(lgpOK, sum( sample(Height_Father) < Height_Mother )))
 ---
 
 ```{r}
-X.rand <- replicate(10000, with(lgpOK, sum( sample(Height_Father) < Height_Mother )))
+X.rand <- replicate(100000, with(lgpOK, sum( sample(Height_Father) < Height_Mother )))
 barplot(prop.table(table(X.rand)))
 ```
 
